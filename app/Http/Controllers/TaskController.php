@@ -37,7 +37,7 @@ class TaskController extends Controller
     }
 
 
-    public function destroy(Task $task)
+    public function destroy($id)
     {
         Task::destroy($id);
 
