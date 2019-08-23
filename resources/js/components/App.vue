@@ -1,5 +1,6 @@
 <template>
   <div class="app-component">
+      <loading :active.sync="isLoading"></loading>
      <table class="table">
          <thead>
              <tr>
@@ -33,9 +34,14 @@
 <script>
 import TaskComponent from './Task.vue'
 
+    import Loading from 'vue-loading-overlay';
+    // Import stylesheet
+    import 'vue-loading-overlay/dist/vue-loading.css';
+
 export default {
   data() {
     return {
+        isLoading: false,
         tasks: [],
         task:{ title: '', priority: ''  }
     } 
@@ -50,19 +56,25 @@ export default {
           });
       },
       store(){
-          window.axios.post('/api/tasks', this.task).then(savedTask =>{
+          if(this.checkInputs()){
+              this.isLoading = true;
+              window.axios.post('/api/tasks', this.task).then(savedTask =>{
               this.tasks.push(savedTask.data);
               this.task.title='';
               this.task.priority='';
-
+                  this.isLoading =false;
           })
+          }
+      },
+      checkInputs(){
+          if(this.task.title && this.task.priority) return  true;
       },
       remove(id){
-                // this.isLoading = true;
+                this.isLoading = true;
                 window.axios.delete(`/api/tasks/${id}`).then(()=>{
                     let index = this.tasks.findIndex(task => task.id === id);
                     this.tasks.splice(index, 1);
-                    // this.isLoading = false;
+                    this.isLoading = false;
                 });
             console.log(`Deleted ${id}`);
         },
@@ -73,7 +85,8 @@ export default {
 
 
   components: {
-      TaskComponent
+      TaskComponent,
+      Loading
   }
 }
 </script>
